@@ -31,7 +31,6 @@ export async function POST(req: Request) {
                         prompt: prompt,
                         image: image, // Replicate accepts data URI
                         prompt_strength: 0.75, // Adjust as needed
-                        refine: "expert_ensemble_refiner",
                         disable_safety_checker: true
                     }
                 }

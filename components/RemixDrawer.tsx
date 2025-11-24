@@ -108,32 +108,39 @@ export default function RemixDrawer() {
 
             // 1. Upload Source Image if it's a file
             if (sourceFile) {
+                console.log('Step 1: Uploading source image...');
                 const fileName = `${user.id}/${Date.now()}-${sourceFile.name}`;
                 const { data: uploadData, error: uploadError } = await supabase.storage
                     .from('remixes')
                     .upload(fileName, sourceFile);
 
-                if (uploadError) throw uploadError;
+                if (uploadError) {
+                    console.error('Upload Error:', uploadError);
+                    throw new Error(`Upload failed: ${uploadError.message}`);
+                }
 
                 const { data: { publicUrl } } = supabase.storage
                     .from('remixes')
                     .getPublicUrl(fileName);
 
                 sourceUrl = publicUrl;
+                console.log('Step 1: Upload complete', sourceUrl);
             }
 
             // 2. Call Replicate API for Generation
+            console.log('Step 2: Calling Replicate API...');
             const response = await fetch('/api/replicate/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     prompt: prompt,
-                    aspectRatio: selectedSize // Pass the selected aspect ratio
+                    aspectRatio: selectedSize,
+                    image: sourceUrl // Pass the source URL if it exists
                 }),
             });
 
             const data = await response.json();
-            console.log("Generation API Response:", data);
+            console.log("Step 2: API Response:", data);
 
             if (!response.ok || data.error) {
                 throw new Error(data.error || 'Generation failed');
@@ -142,11 +149,22 @@ export default function RemixDrawer() {
             const resultUrl = data.imageUrl;
 
             // 3. Save Record to DB
+            console.log('Step 3: Saving to database...');
+
+            // Fetch fresh user to ensure ID is valid and exists in auth.users
+            const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+
+            if (userError || !currentUser) {
+                throw new Error('User session expired. Please sign in again.');
+            }
+
+            console.log('User ID (Fresh):', currentUser.id);
+
             const { error: dbError } = await supabase
                 .from('remixes')
                 .insert({
-                    user_id: user.id,
-                    original_image_url: sourceUrl, // This might be null if no source image
+                    user_id: currentUser.id,
+                    original_image_url: sourceUrl,
                     generated_image_url: resultUrl,
                     prompt_used: prompt,
                     style_preset: selectedStyleImage,
@@ -154,13 +172,19 @@ export default function RemixDrawer() {
                     is_public: true
                 });
 
-            if (dbError) throw dbError;
+            if (dbError) {
+                console.error('Database Error:', dbError);
+                throw new Error(`Database save failed: ${dbError.message}`);
+            }
+            console.log('Step 3: Saved successfully');
 
             setGeneratedResult(resultUrl);
 
-        } catch (error) {
-            console.error('Generation failed:', error);
-            alert('Failed to generate remix. Please try again.');
+        } catch (error: any) {
+            console.error('Generation Process Failed:', error);
+            // Log the message specifically because Error objects don't stringify well
+            console.error('Error Message:', error.message);
+            alert(`Failed: ${error.message || 'Unknown error'}`);
         } finally {
             setIsGenerating(false);
         }

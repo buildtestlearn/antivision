@@ -291,12 +291,15 @@ export default function StudioPage() {
                 })
             });
 
-            if (!response.ok) throw new Error('Failed to save');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.details || errorData.error || 'Failed to save');
+            }
 
             alert('Image saved to your profile!');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Save failed:', error);
-            alert('Failed to save image. Please try again.');
+            alert(`Failed to save image: ${error.message}`);
         }
     };
 

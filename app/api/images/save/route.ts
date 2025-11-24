@@ -17,12 +17,42 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Image URL is required' }, { status: 400 });
         }
 
+        // 1. Download the image from the temporary URL
+        const imageResponse = await fetch(image_url);
+        if (!imageResponse.ok) {
+            throw new Error(`Failed to fetch image from URL: ${imageResponse.statusText}`);
+        }
+        const imageBlob = await imageResponse.blob();
+        const arrayBuffer = await imageBlob.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        // 2. Upload to Supabase Storage
+        // 2. Upload to Supabase Storage (Using 'remixes' bucket as it's already configured)
+        const fileName = `generated/${user.id}/${Date.now()}.png`;
+        const { error: uploadError } = await supabase.storage
+            .from('remixes')
+            .upload(fileName, buffer, {
+                contentType: 'image/png',
+                upsert: false
+            });
+
+        if (uploadError) {
+            console.error('Storage upload error:', uploadError);
+            throw new Error(`Failed to upload to storage: ${uploadError.message}`);
+        }
+
+        // 3. Get Public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('remixes')
+            .getPublicUrl(fileName);
+
+        // 4. Save Metadata to DB
         const { data, error } = await supabase
             .from('generated_images')
             .insert([
                 {
                     user_id: user.id,
-                    image_url,
+                    image_url: publicUrl, // Use the permanent Storage URL
                     prompt,
                     template_id
                 }
@@ -41,7 +71,7 @@ export async function POST(request: Request) {
         return NextResponse.json({
             error: 'Internal Server Error',
             details: error.message,
-            hint: 'Check if generated_images table exists and RLS policies are set.'
+            hint: 'Check if generated_images bucket exists and is public.'
         }, { status: 500 });
     }
 }
