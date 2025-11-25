@@ -27,11 +27,14 @@ interface BentoGalleryProps {
 const MediaItemComponent = ({ item, className, onClick, onRegenerate }: { item: MediaItem, className: string, onClick: () => void, onRegenerate: (index: number) => void }) => {
     if (item.status === 'pending') {
         return (
-            <div className={`${className} relative bg-gray-800 flex items-center justify-center`}>
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-yellow-400"></div>
-                <div className="absolute inset-0 flex flex-col justify-end p-2 sm:p-3 md:p-4 bg-gradient-to-t from-black/60 to-transparent">
-                    <h3 className="relative text-white text-xs sm:text-sm md:text-base font-medium line-clamp-1">{item.title}</h3>
+            <div className={`${className} relative bg-gray-800 overflow-hidden`}>
+                <div className="absolute inset-0 animate-pulse bg-gray-700"></div>
+                <div className="absolute inset-0 flex flex-col justify-end p-3 bg-gradient-to-t from-black/60 to-transparent z-10">
+                    <div className="h-4 w-3/4 bg-gray-600 rounded animate-pulse mb-1"></div>
+                    <div className="h-3 w-1/2 bg-gray-600 rounded animate-pulse"></div>
                 </div>
+                {/* Shimmer effect overlay */}
+                <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.5s_infinite] bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
             </div>
         );
     }

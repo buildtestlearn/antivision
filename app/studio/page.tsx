@@ -2,7 +2,8 @@
 
 import React, { useState, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Upload, Sparkles, X, Download, Heart } from 'lucide-react';
+import { Heart, Download, Share2, Sparkles, Wand2, Image as ImageIcon, Loader2, Camera, Upload, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { templates } from '@/config/templates';
 import CameraModal from '@/components/CameraModal';
 import BentoGallery from '@/components/BentoGallery';
@@ -296,10 +297,10 @@ export default function StudioPage() {
                 throw new Error(errorData.details || errorData.error || 'Failed to save');
             }
 
-            alert('Image saved to your profile!');
+            toast.success('Image saved to your profile!');
         } catch (error: any) {
             console.error('Save failed:', error);
-            alert(`Failed to save image: ${error.message}`);
+            toast.error(`Failed to save image: ${error.message}`);
         }
     };
 
@@ -311,12 +312,22 @@ export default function StudioPage() {
                 onCapture={handleCaptureConfirm}
             />
 
-            <div className="max-w-7xl mx-auto px-4 py-12">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="max-w-7xl mx-auto px-4 py-12"
+            >
                 <header className="relative text-center mb-16">
                     {/* Back Button */}
-                    <a href="/" className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors">
+                    <motion.a
+                        href="/"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                    >
                         <X className="w-6 h-6" />
-                    </a>
+                    </motion.a>
 
                     {/* Profile Link */}
                     <Link href="/u/profile" className="absolute right-0 top-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors text-sm font-medium flex items-center gap-2">
@@ -568,10 +579,12 @@ export default function StudioPage() {
                             </div>
 
                             <div className="flex justify-center mt-8">
-                                <button
+                                <motion.button
                                     onClick={handleGenerateClick}
                                     disabled={isLoading}
-                                    className="px-8 py-4 bg-yellow-400 text-black font-bold text-xl rounded-full hover:bg-yellow-300 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className="px-8 py-4 bg-yellow-400 text-black font-bold text-xl rounded-full hover:bg-yellow-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-yellow-400/20"
                                 >
                                     {isLoading ? (
                                         <>
@@ -584,7 +597,7 @@ export default function StudioPage() {
                                             <span>Generate Images</span>
                                         </>
                                     )}
-                                </button>
+                                </motion.button>
                             </div>
                         </div>
                     </div>
@@ -635,7 +648,7 @@ export default function StudioPage() {
                         </>
                     )}
                 </div>
-            </div>
+            </motion.div>
         </div>
     );
 }

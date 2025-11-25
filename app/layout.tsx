@@ -4,6 +4,7 @@ import "./globals.css";
 import { RemixProvider } from "@/context/RemixContext";
 import RemixDrawer from "@/components/RemixDrawer";
 import { AuthProvider } from "@/context/AuthContext";
+import { Toaster } from "sonner";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -39,6 +40,7 @@ export default function RootLayout({
           <RemixProvider>
             {children}
             <RemixDrawer />
+            <Toaster position="top-center" richColors />
           </RemixProvider>
         </AuthProvider>
       </body>

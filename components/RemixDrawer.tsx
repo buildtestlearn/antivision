@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { X, Upload, Sparkles, Image as ImageIcon, Monitor, Smartphone, Square, Loader2, Wand2, Eye, Ratio, RectangleVertical, LayoutTemplate, Download, ArrowLeft } from 'lucide-react';
+import { toast } from 'sonner';
 import { useRemix } from '@/context/RemixContext';
 import { createClient } from '@/utils/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -32,6 +33,7 @@ export default function RemixDrawer() {
     const [isEnhancing, setIsEnhancing] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [generationStep, setGenerationStep] = useState<'idle' | 'uploading' | 'generating' | 'saving'>('idle');
     const [generatedResult, setGeneratedResult] = useState<string | null>(null);
 
     // Validation for button state
@@ -97,11 +99,12 @@ export default function RemixDrawer() {
     const handleGenerate = async () => {
         if (!isReadyToGenerate || isGenerating) return;
         if (!user) {
-            alert("Please login to generate images");
+            toast.error("Please login to generate images");
             return;
         }
 
         setIsGenerating(true);
+        setGenerationStep('uploading');
 
         try {
             let sourceUrl = sourceImage;
@@ -128,6 +131,7 @@ export default function RemixDrawer() {
             }
 
             // 2. Call Replicate API for Generation
+            setGenerationStep('generating');
             console.log('Step 2: Calling Replicate API...');
             const response = await fetch('/api/replicate/generate', {
                 method: 'POST',
@@ -149,6 +153,7 @@ export default function RemixDrawer() {
             const resultUrl = data.imageUrl;
 
             // 3. Save Record to DB
+            setGenerationStep('saving');
             console.log('Step 3: Saving to database...');
 
             // Fetch fresh user to ensure ID is valid and exists in auth.users
@@ -179,14 +184,16 @@ export default function RemixDrawer() {
             console.log('Step 3: Saved successfully');
 
             setGeneratedResult(resultUrl);
+            toast.success('Remix generated and saved!');
 
         } catch (error: any) {
             console.error('Generation Process Failed:', error);
             // Log the message specifically because Error objects don't stringify well
             console.error('Error Message:', error.message);
-            alert(`Failed: ${error.message || 'Unknown error'}`);
+            toast.error(`Failed: ${error.message || 'Unknown error'}`);
         } finally {
             setIsGenerating(false);
+            setGenerationStep('idle');
         }
     };
 
@@ -418,7 +425,12 @@ export default function RemixDrawer() {
                                     <div className="absolute inset-0 bg-gradient-to-r from-[#667eea] via-[#764ba2] to-[#667eea] opacity-0 group-hover:opacity-30 transition-opacity duration-500" />
                                 )}
                                 <Sparkles size={14} className={isReadyToGenerate && !isGenerating ? "group-hover:rotate-12 transition-transform" : ""} />
-                                <span>{isGenerating ? "Generating..." : "Generate"}</span>
+                                <span>
+                                    {generationStep === 'uploading' && "Uploading..."}
+                                    {generationStep === 'generating' && "Dreaming..."}
+                                    {generationStep === 'saving' && "Saving..."}
+                                    {generationStep === 'idle' && "Generate"}
+                                </span>
                             </button>
                             <p className="text-center text-[9px] text-gray-600 mt-2">
                                 Generates 1 image • Costs 5 credits
