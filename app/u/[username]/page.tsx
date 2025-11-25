@@ -4,6 +4,7 @@ import { use, useState, useEffect } from 'react';
 import { images } from '@/lib/data';
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
+import Button from '@/components/ui/Button';
 
 export default function UserProfile({ params }: { params: Promise<{ username: string }> }) {
     const resolvedParams = use(params);
@@ -11,6 +12,7 @@ export default function UserProfile({ params }: { params: Promise<{ username: st
     const [activeTab, setActiveTab] = useState<'remixes' | 'saved' | 'moodboards'>('remixes');
     const [savedImages, setSavedImages] = useState<any[]>([]);
     const [isLoadingSaved, setIsLoadingSaved] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const supabase = createClient();
 
@@ -86,110 +88,145 @@ export default function UserProfile({ params }: { params: Promise<{ username: st
                     </div>
 
                     <div className="flex gap-4">
-                        <button className="px-6 py-2.5 bg-[#7c3aed] rounded-xl font-medium hover:bg-[#6d28d9] transition-colors">
-                            Follow
-                        </button>
-                        <button className="px-6 py-2.5 bg-[#20202e] border border-white/10 rounded-xl font-medium hover:bg-white/5 transition-colors">
+                        <Button variant="primary" onClick={() => setIsEditModalOpen(true)}>
+                            Edit Profile
+                        </Button>
+                        <Button variant="secondary">
                             Share
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
-                {/* Tabs */}
-                <div className="flex justify-center gap-2 mb-12 border-b border-white/10 pb-1">
-                    {(['remixes', 'saved', 'moodboards'] as const).map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-3 font-medium capitalize relative ${activeTab === tab ? 'text-white' : 'text-[#a0a0b8] hover:text-white'
-                                }`}
-                        >
-                            {tab}
-                            {activeTab === tab && (
-                                <div className="absolute bottom-[-5px] left-0 right-0 h-0.5 bg-[#7c3aed] rounded-full" />
-                            )}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Content Grid */}
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    {activeTab === 'moodboards' ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                            {moodboards.map((board) => (
-                                <Link href={`/board/${board.id}`} key={board.id} className="group block">
-                                    <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-[#13131a] mb-4 relative">
-                                        <img
-                                            src={board.cover}
-                                            alt={board.title}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
-                                    </div>
-                                    <h3 className="font-bold text-lg mb-1 group-hover:text-[#7c3aed] transition-colors">{board.title}</h3>
-                                    <p className="text-sm text-[#a0a0b8]">{board.count} items</p>
-                                </Link>
-                            ))}
+                {/* Edit Profile Modal */}
+                {isEditModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                        <div className="bg-gray-900 border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+                            <h2 className="text-2xl font-bold text-white mb-6 font-caveat">Edit Profile</h2>
+                            <form className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Display Name</label>
+                                    <input
+                                        type="text"
+                                        defaultValue={user.name}
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-yellow-400/50 transition-colors"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-400 mb-1">Bio</label>
+                                    <textarea
+                                        defaultValue={user.bio}
+                                        rows={3}
+                                        className="w-full bg-black/50 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-yellow-400/50 transition-colors resize-none"
+                                    />
+                                </div>
+                                <div className="flex gap-3 pt-4">
+                                    <Button variant="secondary" fullWidth onClick={() => setIsEditModalOpen(false)}>
+                                        Cancel
+                                    </Button>
+                                    <Button variant="primary" fullWidth>
+                                        Save Changes
+                                    </Button>
+                                </div>
+                            </form>
                         </div>
-                    ) : activeTab === 'saved' ? (
-                        isLoadingSaved ? (
-                            <div className="flex justify-center py-20">
-                                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#7c3aed]"></div>
-                            </div>
-                        ) : savedImages.length === 0 ? (
-                            <div className="text-center py-20 text-gray-500">
-                                <p>No saved images yet. Go to Studio to create some!</p>
-                                <Link href="/studio" className="inline-block mt-4 px-6 py-2 bg-[#7c3aed] text-white rounded-full hover:bg-[#6d28d9]">
-                                    Go to Studio
-                                </Link>
-                            </div>
-                        ) : (
-                            <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4">
-                                {savedImages.map((image) => (
-                                    <div key={image.id} className="mb-4 break-inside-avoid group relative rounded-xl overflow-hidden bg-[#13131a]">
-                                        <img
-                                            src={image.image_url}
-                                            alt={image.prompt || 'Generated Image'}
-                                            className="w-full h-auto block transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <div className="absolute bottom-0 left-0 right-0 p-4">
-                                                <p className="text-sm text-white line-clamp-2">{image.prompt}</p>
-                                                <a
-                                                    href={image.image_url}
-                                                    download
-                                                    target="_blank"
-                                                    className="mt-2 inline-block text-xs bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full backdrop-blur-sm transition-colors"
-                                                >
-                                                    Download
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )
+                    </div>
+                )}
+            </div>
+
+            {/* Tabs */}
+            <div className="flex justify-center gap-2 mb-12 border-b border-white/10 pb-1">
+                {(['remixes', 'saved', 'moodboards'] as const).map((tab) => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`px-6 py-3 font-medium capitalize relative ${activeTab === tab ? 'text-white' : 'text-[#a0a0b8] hover:text-white'
+                            }`}
+                    >
+                        {tab}
+                        {activeTab === tab && (
+                            <div className="absolute bottom-[-5px] left-0 right-0 h-0.5 bg-[#7c3aed] rounded-full" />
+                        )}
+                    </button>
+                ))}
+            </div>
+
+            {/* Content Grid */}
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                {activeTab === 'moodboards' ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {moodboards.map((board) => (
+                            <Link href={`/board/${board.id}`} key={board.id} className="group block">
+                                <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-[#13131a] mb-4 relative">
+                                    <img
+                                        src={board.cover}
+                                        alt={board.title}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors" />
+                                </div>
+                                <h3 className="font-bold text-lg mb-1 group-hover:text-[#7c3aed] transition-colors">{board.title}</h3>
+                                <p className="text-sm text-[#a0a0b8]">{board.count} items</p>
+                            </Link>
+                        ))}
+                    </div>
+                ) : activeTab === 'saved' ? (
+                    isLoadingSaved ? (
+                        <div className="flex justify-center py-20">
+                            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#7c3aed]"></div>
+                        </div>
+                    ) : savedImages.length === 0 ? (
+                        <div className="text-center py-20 text-gray-500">
+                            <p>No saved images yet. Go to Studio to create some!</p>
+                            <Link href="/studio" className="inline-block mt-4 px-6 py-2 bg-[#7c3aed] text-white rounded-full hover:bg-[#6d28d9]">
+                                Go to Studio
+                            </Link>
+                        </div>
                     ) : (
                         <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4">
-                            {images.map((image) => (
-                                <Link href={`/image/${image.id}`} key={image.id} className="block mb-4 break-inside-avoid group">
-                                    <div className="relative rounded-xl overflow-hidden bg-[#13131a]">
-                                        <img
-                                            src={image.url}
-                                            alt={image.title}
-                                            className="w-full h-auto block transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                            <div className="absolute bottom-0 left-0 right-0 p-4">
-                                                <h3 className="font-semibold text-sm">{image.title}</h3>
-                                            </div>
+                            {savedImages.map((image) => (
+                                <div key={image.id} className="mb-4 break-inside-avoid group relative rounded-xl overflow-hidden bg-[#13131a]">
+                                    <img
+                                        src={image.image_url}
+                                        alt={image.prompt || 'Generated Image'}
+                                        className="w-full h-auto block transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                                            <p className="text-sm text-white line-clamp-2">{image.prompt}</p>
+                                            <a
+                                                href={image.image_url}
+                                                download
+                                                target="_blank"
+                                                className="mt-2 inline-block text-xs bg-white/20 hover:bg-white/30 text-white px-3 py-1 rounded-full backdrop-blur-sm transition-colors"
+                                            >
+                                                Download
+                                            </a>
                                         </div>
                                     </div>
-                                </Link>
+                                </div>
                             ))}
                         </div>
-                    )}
-                </div>
+                    )
+                ) : (
+                    <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4">
+                        {images.map((image) => (
+                            <Link href={`/image/${image.id}`} key={image.id} className="block mb-4 break-inside-avoid group">
+                                <div className="relative rounded-xl overflow-hidden bg-[#13131a]">
+                                    <img
+                                        src={image.url}
+                                        alt={image.title}
+                                        className="w-full h-auto block transition-transform duration-500 group-hover:scale-105"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                                            <h3 className="font-semibold text-sm">{image.title}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );

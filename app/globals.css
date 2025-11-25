@@ -4,7 +4,10 @@
 @theme {
     --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
     --font-caveat: var(--font-caveat), cursive;
-    --font-outfit: var(--font-outfit), sans-serif;
+    --font-caveat: var(--font-caveat);
+    --font-outfit: var(--font-outfit);
+    --font-inter: 'Inter', sans-serif;
+    --font-outfit: 'Outfit', sans-serif;
 }
 
 @layer base {
@@ -33,6 +36,32 @@
 
         --border-color: rgba(255, 255, 255, 0.1);
         --hover-overlay: rgba(255, 255, 255, 0.05);
+
+        /* Semantic Colors */
+        --color-text-primary: var(--text-primary);
+        --color-text-secondary: var(--text-secondary);
+        --color-text-tertiary: var(--text-tertiary);
+
+        --color-background-primary: var(--bg-primary);
+        --color-background-secondary: var(--bg-secondary);
+        --color-background-tertiary: var(--bg-tertiary);
+        --color-background-elevated: var(--bg-elevated);
+
+        --color-accent-primary: var(--accent-primary);
+        --color-accent-secondary: var(--accent-secondary);
+        --color-accent-tertiary: var(--accent-tertiary);
+
+        --color-border: var(--border-color);
+        --color-hover-overlay: var(--hover-overlay);
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: var(--font-outfit), sans-serif;
     }
 
     * {
@@ -42,9 +71,9 @@
     }
 
     body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: var(--bg-primary);
-        color: var(--text-primary);
+        font-family: var(--font-inter), sans-serif;
+        background-color: var(--color-background-primary);
+        color: var(--color-text-primary);
         line-height: 1.6;
         overflow-x: hidden;
     }

@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useRemix } from '@/context/RemixContext';
 import { createClient } from '@/utils/supabase/client';
 import { useAuth } from '@/context/AuthContext';
+import MediaInput from './MediaInput';
 
 const ASPECT_RATIOS = [
     { id: 'Auto', icon: LayoutTemplate, label: 'Auto' },
@@ -281,42 +282,15 @@ export default function RemixDrawer() {
                             <div className="grid grid-cols-2 gap-2">
 
                                 {/* Slot 1: YOUR FACE (Source) */}
-                                <div className="group relative aspect-square bg-white/5 rounded-xl border border-white/10 border-dashed hover:border-[#7c3aed]/50 hover:bg-white/10 transition-all cursor-pointer overflow-hidden">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleFileUpload}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                    />
-
-                                    {sourceImage ? (
-                                        <>
-                                            <img src={sourceImage} alt="Uploaded" className="w-full h-full object-cover" />
-                                            <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm py-1 text-center border-t border-white/10">
-                                                <span className="text-[9px] font-bold text-white tracking-wide">YOU</span>
-                                            </div>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setSourceImage(null);
-                                                    setSourceFile(null);
-                                                }}
-                                                className="absolute top-1.5 right-1.5 p-1 bg-black/50 rounded-full text-white backdrop-blur-sm hover:bg-red-500/50 transition-colors z-20"
-                                            >
-                                                <X size={10} />
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-gray-500 group-hover:text-gray-300">
-                                            <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-white/10 transition-colors">
-                                                <Upload size={14} />
-                                            </div>
-                                            <div className="flex flex-col items-center text-center px-1">
-                                                <span className="text-[9px] text-gray-500 uppercase font-semibold tracking-wide">Your Face</span>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
+                                <MediaInput
+                                    currentImage={sourceImage}
+                                    onImageChange={(img, file) => {
+                                        setSourceImage(img);
+                                        if (file) setSourceFile(file);
+                                        else setSourceFile(null);
+                                    }}
+                                    compact={true}
+                                />
 
                                 {/* Slot 2: TARGET STYLE (Background Card) */}
                                 <div className="relative aspect-square bg-white/5 rounded-xl border border-white/10 flex flex-col items-center justify-center overflow-hidden group">
