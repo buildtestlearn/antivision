@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useState, useRef, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Download, Share2, Sparkles, Wand2, Image as ImageIcon, Loader2, Camera, Upload, X } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { Heart, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { templates } from '@/config/templates';
 import CameraModal from '@/components/CameraModal';
 import BentoGallery from '@/components/BentoGallery';
 import MediaInput from '@/components/MediaInput';
 import Button from '@/components/ui/Button';
-import Link from 'next/link';
 
 // --- Helper Functions ---
 const toBase64 = (file: File): Promise<string> => new Promise((resolve, reject) => {
@@ -321,22 +320,6 @@ export default function StudioPage() {
                 className="max-w-7xl mx-auto px-4 py-12"
             >
                 <header className="relative text-center mb-16">
-                    {/* Back Button */}
-                    <motion.a
-                        href="/"
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        className="absolute left-0 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
-                    >
-                        <X className="w-6 h-6" />
-                    </motion.a>
-
-                    {/* Profile Link */}
-                    <Link href="/u/profile" className="absolute right-0 top-1/2 -translate-y-1/2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors text-sm font-medium flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-500"></div>
-                        Profile
-                    </Link>
-
                     <h1 className="text-6xl md:text-7xl font-caveat text-white tracking-tight">
                         Picture<span className="text-yellow-400">Me</span>
                     </h1>

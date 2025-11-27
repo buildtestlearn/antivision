@@ -5,19 +5,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Home, Sparkles, Image as ImageIcon, User } from 'lucide-react';
+import { useRemix } from '@/context/RemixContext';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-    // Don't show nav on the actual camera capture view if we were to have a dedicated route for it,
-    // but for now we just wrap everything.
-    // We can conditionally hide it if needed.
+    const { openRemix } = useRemix();
 
     const navItems = [
         { name: 'Home', href: '/', icon: Home },
         { name: 'Studio', href: '/studio', icon: Sparkles },
-        { name: 'Remix', href: '/remix', icon: ImageIcon }, // Assuming /remix or similar exists, or maybe just a placeholder
+        { name: 'Remix', href: '#', icon: ImageIcon, onClick: () => openRemix() },
         { name: 'Profile', href: '/u/profile', icon: User },
     ];
 
@@ -41,6 +39,18 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                         <div className="hidden md:flex items-center gap-8">
                             {navItems.map((item) => {
                                 const isActive = pathname === item.href;
+                                if (item.onClick) {
+                                    return (
+                                        <button
+                                            key={item.name}
+                                            onClick={item.onClick}
+                                            className="relative flex items-center gap-2 text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                                        >
+                                            <item.icon className="w-4 h-4" />
+                                            {item.name}
+                                        </button>
+                                    );
+                                }
                                 return (
                                     <Link
                                         key={item.name}
@@ -84,14 +94,29 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                             <div className="px-4 pt-2 pb-4 space-y-1">
                                 {navItems.map((item) => {
                                     const isActive = pathname === item.href;
+                                    if (item.onClick) {
+                                        return (
+                                            <button
+                                                key={item.name}
+                                                onClick={() => {
+                                                    item.onClick?.();
+                                                    setIsMobileMenuOpen(false);
+                                                }}
+                                                className="w-full text-left px-3 py-2 rounded-md text-base font-medium flex items-center gap-3 text-gray-400 hover:bg-white/5 hover:text-white"
+                                            >
+                                                <item.icon className="w-5 h-5" />
+                                                {item.name}
+                                            </button>
+                                        );
+                                    }
                                     return (
                                         <Link
                                             key={item.name}
                                             href={item.href}
                                             onClick={() => setIsMobileMenuOpen(false)}
                                             className={`block px-3 py-2 rounded-md text-base font-medium flex items-center gap-3 ${isActive
-                                                    ? 'bg-yellow-400/10 text-yellow-400'
-                                                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                                ? 'bg-yellow-400/10 text-yellow-400'
+                                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
                                                 }`}
                                         >
                                             <item.icon className="w-5 h-5" />

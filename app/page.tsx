@@ -3,10 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { images } from '@/lib/data';
-import { useAuth } from '@/context/AuthContext';
 
 export default function Home() {
-  const { user, signOut } = useAuth();
   const [filter, setFilter] = useState<'all' | 'nanobanana' | 'veo'>('all');
 
   const filteredImages = filter === 'all'
@@ -15,79 +13,40 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-black text-white font-sans">
-      {/* Header */}
-      <header className="sticky top-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/10">
-        <div className="max-w-[1600px] mx-auto px-8 py-6">
-          <div className="flex items-center justify-between gap-8 flex-wrap">
-            <h1 className="text-3xl font-extrabold font-caveat tracking-tight">
-              <span className="text-yellow-400">AI</span>
-              {' '}Remix
-            </h1>
-
-            <nav className="flex items-center gap-4">
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setFilter('all')}
-                  className={`px-5 py-2.5 rounded-xl font-medium text-[15px] transition-all ${filter === 'all'
-                    ? 'bg-yellow-400 text-black'
-                    : 'bg-transparent text-gray-400 hover:bg-white/5 hover:text-white'
-                    }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setFilter('nanobanana')}
-                  className={`px-5 py-2.5 rounded-xl font-medium text-[15px] transition-all ${filter === 'nanobanana'
-                    ? 'bg-yellow-400 text-black'
-                    : 'bg-transparent text-gray-400 hover:bg-white/5 hover:text-white'
-                    }`}
-                >
-                  Nanobanana
-                </button>
-                <button
-                  onClick={() => setFilter('veo')}
-                  className={`px-5 py-2.5 rounded-xl font-medium text-[15px] transition-all ${filter === 'veo'
-                    ? 'bg-yellow-400 text-black'
-                    : 'bg-transparent text-gray-400 hover:bg-white/5 hover:text-white'
-                    }`}
-                >
-                  Veo
-                </button>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <Link href="/studio" className="text-gray-400 hover:text-white transition-colors font-medium">
-                  Studio
-                </Link>
-                {user ? (
-                  <div className="flex items-center gap-4">
-                    <Link href="/u/profile" className="text-sm text-gray-400 hover:text-white transition-colors">
-                      {user.email}
-                    </Link>
-                    <button
-                      onClick={() => signOut()}
-                      className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-full text-sm font-medium transition-colors"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="px-4 py-2 bg-white text-black rounded-full text-sm font-medium hover:bg-gray-200 transition-colors"
-                  >
-                    Sign In
-                  </Link>
-                )}
-              </div>
-            </nav>
-          </div>
-        </div>
-      </header>
-
       {/* Main Content */}
-      <main className="py-12">
+      <main className="py-8">
         <div className="max-w-[1600px] mx-auto px-8">
+
+          {/* Filter Bar */}
+          <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-2 no-scrollbar">
+            <button
+              onClick={() => setFilter('all')}
+              className={`px-5 py-2.5 rounded-full font-medium text-[15px] transition-all whitespace-nowrap ${filter === 'all'
+                ? 'bg-yellow-400 text-black'
+                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setFilter('nanobanana')}
+              className={`px-5 py-2.5 rounded-full font-medium text-[15px] transition-all whitespace-nowrap ${filter === 'nanobanana'
+                ? 'bg-yellow-400 text-black'
+                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                }`}
+            >
+              Nanobanana
+            </button>
+            <button
+              onClick={() => setFilter('veo')}
+              className={`px-5 py-2.5 rounded-full font-medium text-[15px] transition-all whitespace-nowrap ${filter === 'veo'
+                ? 'bg-yellow-400 text-black'
+                : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                }`}
+            >
+              Veo
+            </button>
+          </div>
 
           {/* Studio Banner */}
           <div className="mb-12 relative rounded-3xl overflow-hidden bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 p-1">
